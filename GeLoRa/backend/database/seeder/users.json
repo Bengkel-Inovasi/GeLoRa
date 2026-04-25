@@ -1,0 +1,36 @@
+{
+    "seed": [
+        {
+            "id": 1,
+            "name": "Super User",
+            "username": "super",
+            "password": "super@gelora",
+            "role": "super",
+            "bio": "Super user with all permissions"
+        },
+        {
+            "id": 2,
+            "name": "Default Admin",
+            "username": "admin",
+            "password": "admin@gelora",
+            "role": "admin",
+            "bio": "Default admin user with admin permissions"
+        },
+        {
+            "id": 3,
+            "name": "Default Client",
+            "username": "client",
+            "password": "client@gelora",
+            "role": "client",
+            "bio": "Default client user with client permissions"
+        },
+        {
+            "id": 4,
+            "name": "Operator",
+            "username": "Operator",
+            "password": "SuperOperator67",
+            "role": "admin",
+            "bio": "Basecamp operator"
+        }
+    ]
+}

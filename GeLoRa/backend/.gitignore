@@ -1,0 +1,6 @@
+.vscode
+.env
+build
+gelora.db
+gelora_api
+gelora_seeder
