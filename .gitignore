@@ -1,0 +1,23 @@
+# Next.js
+.next/
+out/
+node_modules/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backend
+backend/gelora.db
+backend/gelora_api
+backend/gelora_seeder
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+/tmp/
+*.log
