@@ -56,6 +56,7 @@ function darken(hex: string): string {
 function FlyTo({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap();
   useEffect(() => {
+    if (!isFinite(lat) || !isFinite(lon)) return;
     map.flyTo([lat, lon], Math.max(map.getZoom(), 12), { duration: 1 });
   }, [lat, lon, map]);
   return null;
