@@ -4,16 +4,22 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../../internal/domain/service/auth';
 
-const navItems = [
-  { href: '/dashboard', label: 'Live Tracker', icon: '🗺️' },
-  { href: '/nodes', label: 'Climbers', icon: '🧗' },
-  { href: '/sessions', label: 'Climb History', icon: '⛰️' },
-  { href: '/users', label: 'Users', icon: '👥' },
+const allNavItems = [
+  { href: '/dashboard', label: 'Live Tracker', icon: '🗺️', operatorOnly: false },
+  { href: '/nodes', label: 'Climbers', icon: '🧗', operatorOnly: true },
+  { href: '/sessions', label: 'Climb History', icon: '⛰️', operatorOnly: true },
+  { href: '/users', label: 'Users', icon: '👥', operatorOnly: true },
 ];
 
-export default function Sidebar() {
+interface Props {
+  isOperator: boolean;
+}
+
+export default function Sidebar({ isOperator }: Props) {
   const pathname = usePathname();
   const { signOut } = useAuth();
+
+  const navItems = allNavItems.filter((item) => !item.operatorOnly || isOperator);
 
   return (
     <aside className="hidden md:flex flex-col w-56 bg-slate-900 text-white h-full shrink-0">

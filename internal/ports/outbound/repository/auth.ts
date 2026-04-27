@@ -10,5 +10,6 @@ export interface AuthTokens {
 
 export interface IAuthRepository {
   signIn(payload: SignInPayload): Promise<AuthTokens>;
+  signUp(payload: { name: string; username: string; password: string }): Promise<AuthTokens>;
   refresh(refreshToken: string): Promise<AuthTokens>;
 }

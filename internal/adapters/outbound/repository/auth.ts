@@ -6,6 +6,10 @@ class AuthRepository implements IAuthRepository {
     return httpClient.post<AuthTokens>('/auth/sign-in', payload);
   }
 
+  signUp(payload: { name: string; username: string; password: string }): Promise<AuthTokens> {
+    return httpClient.post<AuthTokens>('/auth/sign-up', payload);
+  }
+
   refresh(refreshToken: string): Promise<AuthTokens> {
     return httpClient.post<AuthTokens>('/auth/refresh', { refresh_token: refreshToken });
   }
