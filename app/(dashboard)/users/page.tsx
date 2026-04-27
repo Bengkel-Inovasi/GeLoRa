@@ -172,7 +172,7 @@ export default function UsersPage() {
 
             <form onSubmit={handleCreate} className="p-6 flex flex-col gap-4">
               <Input label="Full Name" placeholder="e.g. Siti Rahayu" value={newName} onChange={(e) => setNewName(e.target.value)} required />
-              <Input label="Username" placeholder="e.g. siti_rahayu" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required />
+              <Input label="Username (min. 3 characters)" placeholder="e.g. siti" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required />
               <Input label="Password" type="password" placeholder="Min. 8 characters" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
 
               {/* Role picker */}

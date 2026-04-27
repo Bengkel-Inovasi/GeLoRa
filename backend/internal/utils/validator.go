@@ -18,8 +18,8 @@ func ValidateName(name string) error {
 }
 
 func ValidateUsername(username string) error {
-	if len(username) < 8 || len(username) > 64 {
-		return errors.New("Username must be between 8 and 64 characters")
+	if len(username) < 3 || len(username) > 64 {
+		return errors.New("Username must be between 3 and 64 characters")
 	}
 	if !usernameRegex.MatchString(username) {
 		return errors.New("Username may only contain alphanumerics, dashes, and underscores")
