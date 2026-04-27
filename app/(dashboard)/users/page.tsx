@@ -42,15 +42,15 @@ export default function UsersPage() {
   return (
     <>
       <Header title="Users" />
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
         {loading && <div className="flex justify-center py-16"><Spinner size={32} /></div>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <div className="grid gap-3">
           {users.map((u) => (
             <Card key={u.id}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-slate-800">{u.name}</p>
                     <Badge
                       label={u.role}
@@ -61,9 +61,9 @@ export default function UsersPage() {
                   <p className="text-xs text-slate-400 font-mono mt-0.5">@{u.username}</p>
                 </div>
                 {isSuper && me?.id !== u.id && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <select
-                      className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                      className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm flex-1 sm:flex-none"
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
                       disabled={actionId === u.id}

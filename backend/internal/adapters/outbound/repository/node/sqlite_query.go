@@ -110,11 +110,11 @@ func (s *sqliteImpl) queryUpdateNodeInfoById(id int64, name *string, description
 		Update("gelora_nodes")
 
 	if name != nil {
-		q.Set("name", name)
+		q = q.Set("name", name)
 	}
 
 	if description != nil {
-		q.Set("description", description)
+		q = q.Set("description", description)
 	}
 
 	return q.

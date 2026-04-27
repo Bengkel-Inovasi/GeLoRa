@@ -52,23 +52,28 @@ export default function SessionsPage() {
   return (
     <>
       <Header title="Climb History" />
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 md:gap-5">
 
-        <div className="flex items-center justify-between">
-          <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+        {/* Filter tabs — scrollable on narrow screens */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-1">
+          <div className="flex gap-1 bg-slate-100 rounded-lg p-1 shrink-0">
             {(['all', 'active', 'ended'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize ${
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors capitalize whitespace-nowrap ${
                   filter === f ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                {f === 'all' ? `All (${sessions.length})` : f === 'active' ? `Active (${activeCount})` : `Ended (${sessions.length - activeCount})`}
+                {f === 'all'
+                  ? `All (${sessions.length})`
+                  : f === 'active'
+                  ? `Active (${activeCount})`
+                  : `Ended (${sessions.length - activeCount})`}
               </button>
             ))}
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="hidden sm:block text-xs text-slate-400 shrink-0">
             To start tracking, go to <span className="font-medium text-slate-600">Climbers → Register Climber</span>
           </p>
         </div>
@@ -94,7 +99,7 @@ export default function SessionsPage() {
 
             return (
               <Card key={session.id}>
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Badge label={isActive ? '● Active' : 'Ended'} variant={isActive ? 'green' : 'gray'} />

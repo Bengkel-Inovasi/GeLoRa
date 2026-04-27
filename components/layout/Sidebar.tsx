@@ -16,7 +16,7 @@ export default function Sidebar() {
   const { signOut } = useAuth();
 
   return (
-    <aside className="flex flex-col w-56 bg-slate-900 text-white h-full shrink-0">
+    <aside className="hidden md:flex flex-col w-56 bg-slate-900 text-white h-full shrink-0">
       <div className="px-5 py-5 border-b border-slate-700">
         <p className="text-lg font-bold tracking-tight">GeLoRa</p>
         <p className="text-xs text-slate-400 mt-0.5">Mountain Tracker</p>

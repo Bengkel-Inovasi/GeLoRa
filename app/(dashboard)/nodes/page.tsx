@@ -84,13 +84,13 @@ export default function ClimbersPage() {
     <>
       <Header title="Climbers" />
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
         {isAdmin && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-5">
             <p className="text-sm text-slate-500">
               {nodes.length} wristband{nodes.length !== 1 ? 's' : ''} registered
             </p>
-            <Button onClick={openModal}>+ Register Climber</Button>
+            <Button onClick={openModal} size="sm">+ Register Climber</Button>
           </div>
         )}
 
@@ -119,7 +119,8 @@ export default function ClimbersPage() {
             const busy = actionId === node.id;
             return (
               <Card key={node.id}>
-                <div className="flex items-center justify-between gap-4">
+                {/* Stack on mobile, side-by-side on sm+ */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <p className="font-semibold text-slate-800">{node.name}</p>
@@ -156,9 +157,14 @@ export default function ClimbersPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl">
+            {/* Drag handle for mobile */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 bg-slate-300 rounded-full" />
+            </div>
+
+            <div className="flex items-start justify-between px-6 pt-4 pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-lg font-semibold text-slate-800">Register New Climber</h2>
                 <p className="text-xs text-slate-400 mt-0.5">Links a wristband to a climber and starts tracking immediately</p>
@@ -195,7 +201,7 @@ export default function ClimbersPage() {
                 <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{registerError}</p>
               )}
 
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-3 pt-1 pb-safe">
                 <Button type="button" variant="secondary" className="flex-1" onClick={() => setShowModal(false)}>
                   Cancel
                 </Button>
