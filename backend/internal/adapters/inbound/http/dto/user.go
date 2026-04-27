@@ -1,6 +1,7 @@
 package adaptersinboundhttpdto
 
 import (
+	"errors"
 	"time"
 
 	domainmodel "github.com/Bengkel-Inovasi/GeLoRa/backend/internal/domain/model"
@@ -20,11 +21,11 @@ type PostSignInResponse struct {
 }
 
 func (r *PostSignInRequest) Validate() error {
-	if err := utils.ValidateUsername(r.Username); err != nil {
-		return err
+	if len(r.Username) == 0 {
+		return errors.New("Username is required")
 	}
-	if err := utils.ValidatePassword(r.Password); err != nil {
-		return err
+	if len(r.Password) == 0 {
+		return errors.New("Password is required")
 	}
 	return nil
 }
