@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useNodes } from '@/internal/domain/service/http/node';
-import { useNodeRecords } from '@/internal/domain/service/http/record';
+import { useNodeRecords, useNodeTrails } from '@/internal/domain/service/http/record';
 import NodeList from '@/components/dashboard/NodeList';
 import NodePanel from '@/components/dashboard/NodePanel';
 import Header from '@/components/layout/Header';
@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const { nodes, loading } = useNodes();
   const nodeIds = nodes.map((n) => n.id);
   const { recordMap } = useNodeRecords(nodeIds);
+  const { trailMap } = useNodeTrails(nodeIds);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map');
 
@@ -59,6 +60,7 @@ export default function DashboardPage() {
             <MapView
               nodes={nodes}
               recordMap={recordMap}
+              trailMap={trailMap}
               selectedNodeId={selectedNodeId}
               onSelectNode={setSelectedNodeId}
             />
@@ -111,6 +113,7 @@ export default function DashboardPage() {
                 <MapView
                   nodes={nodes}
                   recordMap={recordMap}
+                  trailMap={trailMap}
                   selectedNodeId={selectedNodeId}
                   onSelectNode={setSelectedNodeId}
                 />

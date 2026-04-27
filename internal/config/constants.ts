@@ -14,3 +14,8 @@ export const MAP_DEFAULT_CENTER: [number, number] = [-2.5, 118];
 export const MAP_DEFAULT_ZOOM = 5;
 
 export const RECORD_LOOKBACK_SECONDS = 300;
+
+// How far back to fetch trail history (2 hours)
+export const TRAIL_LOOKBACK_SECONDS = 7200;
+// Trail data is fetched less often than live vitals
+export const TRAIL_POLL_INTERVAL_MS = 30_000;

@@ -1,22 +1,38 @@
 'use client';
 
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { NodeListItem } from '../../internal/domain/model/node';
-import type { NodeRecordMap } from '../../internal/domain/service/http/record';
+import type { NodeRecordMap, NodeTrailMap } from '../../internal/domain/service/http/record';
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, TILE_URL, TILE_ATTRIBUTION } from '../../internal/config/constants';
-import { formatHeartRate, formatBodyTemp, formatCoords, formatTime } from '../../internal/utils/format';
+import { formatHeartRate, formatBodyTemp, formatTime } from '../../internal/utils/format';
 
-function createIcon(selected: boolean) {
-  const color = selected ? '#ef4444' : '#059669';
-  const border = selected ? '#991b1b' : '#065f46';
+// Distinct palette — one colour per climber, cycles if more than 8
+const TRAIL_PALETTE = [
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+  '#84cc16', // lime
+  '#f97316', // orange
+  '#14b8a6', // teal
+];
+
+function trailColor(nodeId: number): string {
+  return TRAIL_PALETTE[nodeId % TRAIL_PALETTE.length];
+}
+
+function createIcon(selected: boolean, color: string) {
+  const border = selected ? '#1e3a5f' : darken(color);
+  const bg = selected ? '#ef4444' : color;
   return L.divIcon({
     className: '',
     html: `<div style="
       width:28px;height:28px;border-radius:50%;
-      background:${color};border:3px solid ${border};
+      background:${bg};border:3px solid ${border};
       box-shadow:0 2px 6px rgba(0,0,0,0.35);
       display:flex;align-items:center;justify-content:center;
     ">
@@ -26,6 +42,15 @@ function createIcon(selected: boolean) {
     iconAnchor: [14, 14],
     popupAnchor: [0, -16],
   });
+}
+
+function darken(hex: string): string {
+  // Darken a hex colour by ~30% for the marker border
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.max(0, ((n >> 16) & 0xff) - 70);
+  const g = Math.max(0, ((n >> 8) & 0xff) - 70);
+  const b = Math.max(0, (n & 0xff) - 70);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
 function FlyTo({ lat, lon }: { lat: number; lon: number }) {
@@ -39,11 +64,12 @@ function FlyTo({ lat, lon }: { lat: number; lon: number }) {
 interface Props {
   nodes: NodeListItem[];
   recordMap: NodeRecordMap;
+  trailMap?: NodeTrailMap;
   selectedNodeId: number | null;
   onSelectNode: (id: number) => void;
 }
 
-export default function MapView({ nodes, recordMap, selectedNodeId, onSelectNode }: Props) {
+export default function MapView({ nodes, recordMap, trailMap, selectedNodeId, onSelectNode }: Props) {
   const selectedRecord = selectedNodeId != null ? recordMap.get(selectedNodeId) : undefined;
 
   return (
@@ -59,16 +85,32 @@ export default function MapView({ nodes, recordMap, selectedNodeId, onSelectNode
         <FlyTo lat={selectedRecord.latitude} lon={selectedRecord.longitude} />
       )}
 
+      {/* Trail polylines — rendered before markers so they appear underneath */}
+      {nodes.map((node) => {
+        const trail = trailMap?.get(node.id);
+        if (!trail || trail.length < 2) return null;
+        const color = trailColor(node.id);
+        return (
+          <Polyline
+            key={`trail-${node.id}`}
+            positions={trail}
+            pathOptions={{ color, weight: 3, opacity: 0.65 }}
+          />
+        );
+      })}
+
+      {/* Node markers */}
       {nodes.map((node) => {
         const rec = recordMap.get(node.id);
         if (rec?.latitude == null || rec?.longitude == null) return null;
         const isSelected = node.id === selectedNodeId;
+        const color = trailColor(node.id);
 
         return (
           <Marker
             key={node.id}
             position={[rec.latitude, rec.longitude]}
-            icon={createIcon(isSelected)}
+            icon={createIcon(isSelected, color)}
             eventHandlers={{ click: () => onSelectNode(node.id) }}
           >
             <Popup>
