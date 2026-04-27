@@ -81,7 +81,8 @@ export default function MapView({ nodes, recordMap, trailMap, selectedNodeId, on
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
 
-      {selectedRecord?.latitude != null && selectedRecord?.longitude != null && (
+      {selectedRecord?.latitude != null && selectedRecord?.longitude != null &&
+        isFinite(selectedRecord.latitude) && isFinite(selectedRecord.longitude) && (
         <FlyTo lat={selectedRecord.latitude} lon={selectedRecord.longitude} />
       )}
 
@@ -102,7 +103,10 @@ export default function MapView({ nodes, recordMap, trailMap, selectedNodeId, on
       {/* Node markers */}
       {nodes.map((node) => {
         const rec = recordMap.get(node.id);
-        if (rec?.latitude == null || rec?.longitude == null) return null;
+        if (
+          rec?.latitude == null || rec?.longitude == null ||
+          !isFinite(rec.latitude) || !isFinite(rec.longitude)
+        ) return null;
         const isSelected = node.id === selectedNodeId;
         const color = trailColor(node.id);
 

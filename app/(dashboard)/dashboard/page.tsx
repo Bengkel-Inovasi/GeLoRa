@@ -158,7 +158,12 @@ export default function DashboardPage() {
                     </div>
                     <div className="bg-slate-50 rounded-lg px-3 py-2 col-span-2">
                       <p className="text-xs text-slate-400">Coordinates · {formatTime(selectedRecord.time)}</p>
-                      <p className="text-sm font-semibold text-slate-800 font-mono">{formatCoords(selectedRecord.latitude, selectedRecord.longitude)}</p>
+                      <p className="text-sm font-semibold text-slate-800 font-mono">
+                        {selectedRecord.latitude != null && selectedRecord.longitude != null &&
+                         isFinite(selectedRecord.latitude) && isFinite(selectedRecord.longitude)
+                          ? formatCoords(selectedRecord.latitude, selectedRecord.longitude)
+                          : '—'}
+                      </p>
                     </div>
                   </div>
                 ) : (

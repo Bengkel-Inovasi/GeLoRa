@@ -68,7 +68,10 @@ export function useNodeTrails(nodeIds: number[]) {
       results.forEach((r, i) => {
         if (r.status !== 'fulfilled') return;
         const points: [number, number][] = r.value.data
-          .filter((rec) => rec.latitude != null && rec.longitude != null)
+          .filter((rec) =>
+            rec.latitude != null && rec.longitude != null &&
+            isFinite(rec.latitude) && isFinite(rec.longitude)
+          )
           .map((rec) => [rec.latitude as number, rec.longitude as number]);
         if (points.length > 0) next.set(nodeIdsRef.current[i], points);
       });
