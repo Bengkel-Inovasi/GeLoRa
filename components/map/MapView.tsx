@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { NodeListItem } from '../../internal/domain/model/node';
@@ -25,6 +25,14 @@ function trailColor(nodeId: number): string {
   return TRAIL_PALETTE[nodeId % TRAIL_PALETTE.length];
 }
 
+function darken(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.max(0, ((n >> 16) & 0xff) - 70);
+  const g = Math.max(0, ((n >> 8) & 0xff) - 70);
+  const b = Math.max(0, (n & 0xff) - 70);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
 function createIcon(selected: boolean, color: string) {
   const border = selected ? '#1e3a5f' : darken(color);
   const bg = selected ? '#ef4444' : color;
@@ -44,24 +52,6 @@ function createIcon(selected: boolean, color: string) {
   });
 }
 
-function darken(hex: string): string {
-  // Darken a hex colour by ~30% for the marker border
-  const n = parseInt(hex.slice(1), 16);
-  const r = Math.max(0, ((n >> 16) & 0xff) - 70);
-  const g = Math.max(0, ((n >> 8) & 0xff) - 70);
-  const b = Math.max(0, (n & 0xff) - 70);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}
-
-function FlyTo({ lat, lon }: { lat: number; lon: number }) {
-  const map = useMap();
-  useEffect(() => {
-    if (!isFinite(lat) || !isFinite(lon)) return;
-    map.flyTo([lat, lon], Math.max(map.getZoom(), 12), { duration: 1 });
-  }, [lat, lon, map]);
-  return null;
-}
-
 interface Props {
   nodes: NodeListItem[];
   recordMap: NodeRecordMap;
@@ -71,21 +61,32 @@ interface Props {
 }
 
 export default function MapView({ nodes, recordMap, trailMap, selectedNodeId, onSelectNode }: Props) {
+  const mapRef = useRef<L.Map | null>(null);
   const selectedRecord = selectedNodeId != null ? recordMap.get(selectedNodeId) : undefined;
+
+  // Pan to selected node — runs in the parent so the map ref is always ready
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const lat = selectedRecord?.latitude;
+    const lon = selectedRecord?.longitude;
+    if (lat == null || lon == null || !isFinite(lat) || !isFinite(lon)) return;
+    try {
+      map.flyTo([lat, lon], Math.max(map.getZoom(), 12), { duration: 1 });
+    } catch {
+      // ignore — Leaflet may not be fully ready on the very first render
+    }
+  }, [selectedRecord?.latitude, selectedRecord?.longitude]);
 
   return (
     <MapContainer
+      ref={mapRef}
       center={MAP_DEFAULT_CENTER}
       zoom={MAP_DEFAULT_ZOOM}
       className="h-full w-full"
       zoomControl
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
-
-      {selectedRecord?.latitude != null && selectedRecord?.longitude != null &&
-        isFinite(selectedRecord.latitude) && isFinite(selectedRecord.longitude) && (
-        <FlyTo lat={selectedRecord.latitude} lon={selectedRecord.longitude} />
-      )}
 
       {/* Trail polylines — rendered before markers so they appear underneath */}
       {nodes.map((node) => {
