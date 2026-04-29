@@ -24,6 +24,7 @@ func Route(
 	hdlNode *adaptersinboundhttphandler.Node,
 	hdlSession *adaptersinboundhttphandler.Session,
 	hdlRecord *adaptersinboundhttphandler.Record,
+	hdlAlert *adaptersinboundhttphandler.Alert,
 ) {
 	docs := router.Group("/docs")
 	{
@@ -296,6 +297,39 @@ func Route(
 		sessions.DELETE(
 			"/:id",
 			hdlSession.DeleteSessionById,
+		)
+	}
+
+	alerts := router.Group(
+		"/alerts",
+		adaptersinboundhttpmiddlewarelogger.Logger(
+			log,
+			"Alert request succeeded",
+			"Alert request failed",
+			"Alert server error",
+		),
+		adaptersinboundhttpmiddlewareauth.Jwt(),
+	)
+	{
+		// All authenticated users can report an emergency
+		alerts.POST("", hdlAlert.PostAlert)
+
+		// Only admin/super can see and acknowledge alerts
+		alerts.GET(
+			"",
+			adaptersinboundhttpmiddlewarerolerule.RoleRule([]adaptersinboundhttpmiddlewarerolerule.RoleRuler{
+				{Role: domainmodel.UserRoleSuper, Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll()},
+				{Role: domainmodel.UserRoleAdmin, Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll()},
+			}),
+			hdlAlert.GetAlertsList,
+		)
+		alerts.PUT(
+			"/:id/acknowledge",
+			adaptersinboundhttpmiddlewarerolerule.RoleRule([]adaptersinboundhttpmiddlewarerolerule.RoleRuler{
+				{Role: domainmodel.UserRoleSuper, Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll()},
+				{Role: domainmodel.UserRoleAdmin, Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll()},
+			}),
+			hdlAlert.PutAlertAcknowledge,
 		)
 	}
 

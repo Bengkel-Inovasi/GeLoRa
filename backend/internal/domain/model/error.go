@@ -13,7 +13,9 @@ var (
 	ErrUserNotFound           = errors.New("User can not be found")
 	ErrUserInvalidCredentials = errors.New("User credentials are invalid")
 
-	ErrSessionNotFound     = errors.New("Session can not be found")
-	ErrSessionNoIdentifier = errors.New("Session requires at least one identifier")
+	ErrSessionNotFound      = errors.New("Session can not be found")
+	ErrSessionNoIdentifier  = errors.New("Session requires at least one identifier")
 	ErrSessionAlreadyActive = errors.New("Session is already active")
+
+	ErrAlertNotFound = errors.New("Alert can not be found")
 )

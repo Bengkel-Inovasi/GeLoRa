@@ -21,6 +21,7 @@ func (c *Core) NewDelivery(ctx context.Context) (err error) {
 		adaptersinboundhttphandler.NewNode(c.wiring.svcHttpNode),
 		adaptersinboundhttphandler.NewSession(c.wiring.svcHttpSession),
 		adaptersinboundhttphandler.NewRecord(c.wiring.svcHttpRecord),
+		adaptersinboundhttphandler.NewAlert(c.wiring.svcHttpAlert),
 	)
 	c.wiring.log.Info(ctx, tag, "HTTP Routes delivered", nil)
 

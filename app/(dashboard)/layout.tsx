@@ -5,6 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { tokenStore } from '../../internal/utils/token';
 import Sidebar from '../../components/layout/Sidebar';
+import SOSButton from '../../components/ui/SOSButton';
+import AlertListener from '../../components/AlertListener';
 
 const allNavItems = [
   { href: '/dashboard', label: 'Map', icon: '🗺️', operatorOnly: false },
@@ -45,10 +47,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
+      {isOperator && <AlertListener />}
       <Sidebar isOperator={isOperator} />
       <div className="flex flex-col flex-1 overflow-hidden pb-16 md:pb-0">
         {children}
       </div>
+      <SOSButton />
 
       {/* Mobile bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex md:hidden z-50"
