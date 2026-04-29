@@ -29,8 +29,9 @@ export default function SOSButton() {
         setSent(false);
         setOpen(false);
       }, 3000);
-    } catch {
-      alert('Failed to send SOS. Check your connection.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      alert(`SOS failed: ${msg}`);
     } finally {
       setSending(false);
     }
