@@ -33,13 +33,13 @@ func NewSqliteImpl(
 	}
 }
 
-func (s *sqliteImpl) CreateAlert(ctx context.Context, userId int64, message string) (id int64, err error) {
+func (s *sqliteImpl) CreateAlert(ctx context.Context, userId int64, nodeId *int64, message string) (id int64, err error) {
 	const tag = path + "/CreateAlert"
 	logMeta := func(err error) domainmodel.LogMeta {
 		return domainmodel.LogMeta{"error": err.Error(), "user_id": userId}
 	}
 
-	query, args, err := s.queryCreateAlert(userId, message)
+	query, args, err := s.queryCreateAlert(userId, nodeId, message)
 	if err != nil {
 		s.log.Error(ctx, tag, "Failed to build the query", logMeta(err))
 		return 0, domainmodel.ErrQueryBuilder
@@ -81,7 +81,7 @@ func (s *sqliteImpl) ReadAlerts(ctx context.Context, unacknowledgedOnly bool) (a
 
 	for rows.Next() {
 		var a domainmodel.Alert
-		if err = rows.Scan(&a.Id, &a.UserId, &a.Message, &a.AcknowledgedAt, &a.CreatedAt); err != nil {
+		if err = rows.Scan(&a.Id, &a.UserId, &a.NodeId, &a.Message, &a.AcknowledgedAt, &a.CreatedAt); err != nil {
 			s.log.Error(ctx, tag, "Failed to scan a row", logMeta(err))
 			return nil, err
 		}

@@ -3,8 +3,8 @@ import type { Alert } from '../../../domain/model/alert';
 import { httpClient } from '../client/http';
 
 class AlertRepository implements IAlertRepository {
-  create(message: string): Promise<{ id: number }> {
-    return httpClient.post('/alerts', { message });
+  create(nodeId: number | null, message: string): Promise<{ id: number }> {
+    return httpClient.post('/alerts', { node_id: nodeId ?? undefined, message });
   }
 
   list(params?: { unacknowledged?: boolean }): Promise<{ data: Alert[] }> {

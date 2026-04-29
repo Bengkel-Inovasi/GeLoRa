@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(echo \"Started PID $!\")"
+      "Bash(echo \"Started PID $!\")",
+      "Bash(git -C /home/rozan/GeLoRa commit -m ' *)",
+      "Bash(git -C /home/rozan/GeLoRa push origin main)",
+      "Bash(git -C /home/rozan/GeLoRa remote -v)",
+      "Bash(git -C /home/rozan/GeLoRa config --list)",
+      "Bash(git -C /home/rozan/GeLoRa add internal/utils/token.ts internal/ports/outbound/repository/auth.ts internal/adapters/outbound/repository/auth.ts components/layout/Header.tsx components/layout/Sidebar.tsx 'app/\\(dashboard\\)/layout.tsx' 'app/\\(dashboard\\)/users/page.tsx')",
+      "Bash(git -C /home/rozan/GeLoRa add internal/config/constants.ts internal/domain/service/http/record.ts components/map/MapView.tsx 'app/\\(dashboard\\)/dashboard/page.tsx')",
+      "Bash(xargs cat *)",
+      "Bash(git -C /home/rozan/GeLoRa add backend/internal/utils/validator.go app/\\\\\\(dashboard\\\\\\)/users/page.tsx)",
+      "Bash(go build *)",
+      "Bash(git -C /home/rozan/GeLoRa add backend/internal/adapters/inbound/http/dto/user.go)",
+      "Bash(sqlite3 /home/rozan/GeLoRa/backend/gelora.db \"SELECT id, name, username, role FROM gelora_users;\")",
+      "Bash(python3 -c ' *)",
+      "Bash(git -C /home/rozan/GeLoRa add internal/domain/service/http/record.ts components/map/MapView.tsx 'app/\\(dashboard\\)/dashboard/page.tsx')",
+      "Bash(git -C /home/rozan/GeLoRa add components/map/MapView.tsx internal/utils/format.ts)",
+      "Bash(git -C /home/rozan/GeLoRa log --oneline origin/main..HEAD)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

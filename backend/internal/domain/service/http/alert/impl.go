@@ -26,9 +26,9 @@ func NewImpl(
 	return &impl{tx: tx, log: log, repoAlert: repoAlert}
 }
 
-func (i *impl) AddAlert(ctx context.Context, userId int64, message string) (id int64, err error) {
+func (i *impl) AddAlert(ctx context.Context, userId int64, nodeId *int64, message string) (id int64, err error) {
 	const tag = path + "/AddAlert"
-	id, err = i.repoAlert.CreateAlert(ctx, userId, message)
+	id, err = i.repoAlert.CreateAlert(ctx, userId, nodeId, message)
 	if err != nil {
 		i.log.Error(ctx, tag, "Failed to create alert", domainmodel.LogMeta{"error": err.Error(), "user_id": userId})
 		return 0, err

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAlerts } from '@/internal/domain/service/http/alert';
+import { useNodes } from '@/internal/domain/service/http/node';
 import { formatDateTime } from '@/internal/utils/format';
 
 function playAlarmTone(ctx: AudioContext) {
@@ -24,11 +25,13 @@ function playAlarmTone(ctx: AudioContext) {
 
 export default function AlertListener() {
   const { alerts, acknowledge } = useAlerts(5000);
+  const { nodes } = useNodes();
   const audioCtxRef = useRef<AudioContext | null>(null);
   const alarmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevCountRef = useRef(0);
 
-  // Play alarm whenever there are unacknowledged alerts
+  const nodeMap = new Map(nodes.map((n) => [n.id, n.name]));
+
   useEffect(() => {
     if (alerts.length === 0) {
       if (alarmIntervalRef.current) {
@@ -39,7 +42,6 @@ export default function AlertListener() {
       return;
     }
 
-    // New alert arrived — ensure AudioContext exists (requires user gesture first touch)
     if (!audioCtxRef.current) {
       try {
         audioCtxRef.current = new AudioContext();
@@ -48,13 +50,11 @@ export default function AlertListener() {
       }
     }
 
-    // Play immediately on first alert or when count increases
     if (alerts.length > prevCountRef.current) {
       playAlarmTone(audioCtxRef.current);
     }
     prevCountRef.current = alerts.length;
 
-    // Repeat alarm every 8 seconds while unacknowledged alerts exist
     if (!alarmIntervalRef.current) {
       alarmIntervalRef.current = setInterval(() => {
         if (audioCtxRef.current) playAlarmTone(audioCtxRef.current);
@@ -64,7 +64,6 @@ export default function AlertListener() {
     return () => {};
   }, [alerts]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
@@ -75,25 +74,32 @@ export default function AlertListener() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[2000] flex flex-col gap-2 p-3 pointer-events-none">
-      {alerts.map((alert) => (
-        <div
-          key={alert.id}
-          className="pointer-events-auto flex items-start gap-3 bg-red-600 text-white px-4 py-3 rounded-xl shadow-2xl animate-pulse"
-        >
-          <span className="text-2xl shrink-0 mt-0.5">🚨</span>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">Emergency Alert #{alert.id}</p>
-            <p className="text-xs text-red-100 truncate">{alert.message || 'Emergency! Help needed!'}</p>
-            <p className="text-[10px] text-red-200 mt-0.5">{formatDateTime(alert.created_at)}</p>
-          </div>
-          <button
-            onClick={() => acknowledge(alert.id)}
-            className="shrink-0 bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
+      {alerts.map((alert) => {
+        const climberName = alert.node_id ? (nodeMap.get(alert.node_id) ?? `Wristband #${alert.node_id}`) : null;
+        return (
+          <div
+            key={alert.id}
+            className="pointer-events-auto flex items-start gap-3 bg-red-600 text-white px-4 py-3 rounded-xl shadow-2xl animate-pulse"
           >
-            Acknowledge
-          </button>
-        </div>
-      ))}
+            <span className="text-2xl shrink-0 mt-0.5">🚨</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">
+                {climberName ? `${climberName} needs help!` : 'Emergency Alert'}
+              </p>
+              {alert.message && (
+                <p className="text-xs text-red-100 truncate mt-0.5">{alert.message}</p>
+              )}
+              <p className="text-[10px] text-red-200 mt-0.5">{formatDateTime(alert.created_at)}</p>
+            </div>
+            <button
+              onClick={() => acknowledge(alert.id)}
+              className="shrink-0 bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
+            >
+              Acknowledge
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

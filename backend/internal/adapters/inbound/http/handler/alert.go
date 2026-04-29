@@ -34,7 +34,7 @@ func (a *Alert) PostAlert(c *gin.Context) {
 		return
 	}
 
-	id, err := a.svcAlert.AddAlert(c.Request.Context(), claims.Id, req.Message)
+	id, err := a.svcAlert.AddAlert(c.Request.Context(), claims.Id, req.NodeId, req.Message)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, adaptersinboundhttpdto.CommonErrorResponse{Error: "Something wrong happened"})
 		return

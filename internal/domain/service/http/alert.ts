@@ -33,6 +33,6 @@ export function useAlerts(pollIntervalMs = 5000) {
   return { alerts, acknowledge, refetch: fetch };
 }
 
-export async function sendAlert(message: string): Promise<void> {
-  await alertRepository.create(message);
+export async function sendAlert(nodeId: number | null, message: string): Promise<void> {
+  await alertRepository.create(nodeId, message);
 }

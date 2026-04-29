@@ -2,17 +2,17 @@ package adaptersoutboundrepositoryalert
 
 import "github.com/Masterminds/squirrel"
 
-func (s *sqliteImpl) queryCreateAlert(userId int64, message string) (query string, args []any, err error) {
+func (s *sqliteImpl) queryCreateAlert(userId int64, nodeId *int64, message string) (query string, args []any, err error) {
 	return s.sqrQuestion.
 		Insert("gelora_alerts").
-		Columns("user_id", "message").
-		Values(userId, message).
+		Columns("user_id", "node_id", "message").
+		Values(userId, nodeId, message).
 		ToSql()
 }
 
 func (s *sqliteImpl) queryReadAlerts(unacknowledgedOnly bool) (query string, args []any, err error) {
 	q := s.sqrQuestion.
-		Select("id", "user_id", "message", "acknowledged_at", "created_at").
+		Select("id", "user_id", "node_id", "message", "acknowledged_at", "created_at").
 		From("gelora_alerts").
 		OrderBy("created_at DESC")
 
