@@ -9,7 +9,6 @@ import (
 	portsinboundmqtt "github.com/Bengkel-Inovasi/GeLoRa/backend/internal/ports/inbound/mqtt"
 	portsoutboundlogging "github.com/Bengkel-Inovasi/GeLoRa/backend/internal/ports/outbound/logging"
 	portsoutboundrepository "github.com/Bengkel-Inovasi/GeLoRa/backend/internal/ports/outbound/repository"
-	"github.com/Bengkel-Inovasi/GeLoRa/backend/pkg/namegen"
 	"github.com/Bengkel-Inovasi/GeLoRa/backend/pkg/sqldt"
 )
 
@@ -61,7 +60,7 @@ func (i *impl) AddRecord(ctx context.Context, mid string, time time.Time, heartR
 			return 0, err
 		}
 
-		nodeId, err := i.repoNode.CreateNode(ctx, mid, namegen.Generate())
+		nodeId, err := i.repoNode.CreateNode(ctx, mid, mid)
 		if err != nil && !errors.Is(err, domainmodel.ErrNodeMidExists) {
 			i.log.Error(ctx, tag, "Failed to create node", logMeta(err))
 			return 0, err

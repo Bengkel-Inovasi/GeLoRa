@@ -57,6 +57,10 @@
 // ─── Timing ─────────────────────────────────────────────────────────────────
 #define SEND_INTERVAL_MS 5000   // send reading every 5 seconds
 
+// ─── Filtering Constants ────────────────────────────────────────────────────
+#define TEMP_FILTER_SIZE 10
+#define BPM_FILTER_SIZE  8
+
 // ─── Globals ────────────────────────────────────────────────────────────────
 MAX30105         maxSensor;
 Adafruit_MLX90614 mlx;
@@ -71,12 +75,38 @@ long        lastBeatTime = 0;
 float       beatsPerMinute = 0;
 float       beatAvg = 0;
 
+// Moving Average Filters
+float tempHistory[TEMP_FILTER_SIZE];
+int tempIndex = 0;
+float bpmHistory[BPM_FILTER_SIZE];
+int bpmIndex = 0;
+
 unsigned long lastSendMs = 0;
+
+// ─── Filter Functions ───────────────────────────────────────────────────────
+float movingAverage(float newValue, float *history, int *index, int size) {
+  history[*index] = newValue;
+  *index = (*index + 1) % size;
+  
+  float sum = 0;
+  int count = 0;
+  for (int i = 0; i < size; i++) {
+    if (history[i] > 0) {
+      sum += history[i];
+      count++;
+    }
+  }
+  return (count > 0) ? (sum / count) : 0;
+}
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
 void setup() {
   Serial.begin(115200);
   Wire.begin(8, 9);  // SDA, SCL
+
+  // Initialize filter histories
+  for (int i = 0; i < TEMP_FILTER_SIZE; i++) tempHistory[i] = 0;
+  for (int i = 0; i < BPM_FILTER_SIZE; i++) bpmHistory[i] = 0;
 
   // MAX30102
   if (!maxSensor.begin(Wire, I2C_SPEED_FAST)) {
@@ -84,7 +114,9 @@ void setup() {
     while (true) delay(10);
   }
   maxSensor.setup();
-  maxSensor.setPulseAmplitudeRed(0x0A);
+  // Increased amplitude for better penetration on wrist-top
+  maxSensor.setPulseAmplitudeRed(0x1F); 
+  maxSensor.setPulseAmplitudeIR(0x1F);
   maxSensor.setPulseAmplitudeGreen(0);
   Serial.println("MAX30102 ready");
 
@@ -148,15 +180,17 @@ void loop() {
   StaticJsonDocument<256> doc;
   doc["mid"] = DEVICE_MID;
 
-  // Heart rate
+  // Heart rate with Moving Average Filter
   if (beatAvg > 20) {
-    doc["heart_rate"] = round(beatAvg * 10) / 10.0;
+    float filteredBpm = movingAverage(beatAvg, bpmHistory, &bpmIndex, BPM_FILTER_SIZE);
+    doc["heart_rate"] = round(filteredBpm * 10) / 10.0;
   }
 
-  // Body temperature (object temperature = surface of wrist skin)
+  // Body temperature with Moving Average Filter
   float bodyTemp = mlx.readObjectTempC();
   if (!isnan(bodyTemp) && bodyTemp > 30.0 && bodyTemp < 42.0) {
-    doc["body_temperature"] = round(bodyTemp * 10) / 10.0;
+    float filteredTemp = movingAverage(bodyTemp, tempHistory, &tempIndex, TEMP_FILTER_SIZE);
+    doc["body_temperature"] = round(filteredTemp * 10) / 10.0;
   }
 
   // GPS

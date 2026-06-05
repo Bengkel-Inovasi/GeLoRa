@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { sendAlert } from '@/internal/domain/service/http/alert';
 import { useNodes } from '@/internal/domain/service/http/node';
 
-export default function SOSButton() {
+interface SOSButtonProps {
+  activeNodeId?: number | null;
+}
+
+export default function SOSButton({ activeNodeId }: SOSButtonProps) {
   const [open, setOpen] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [message, setMessage] = useState('');
@@ -12,10 +16,17 @@ export default function SOSButton() {
   const [sent, setSent] = useState(false);
   const { nodes } = useNodes();
 
+  // Automatically select the active node when the modal opens
+  useEffect(() => {
+    if (open && activeNodeId) {
+      setSelectedNodeId(activeNodeId);
+    }
+  }, [open, activeNodeId]);
+
   function handleOpen() {
     setOpen(true);
     setSent(false);
-    setSelectedNodeId(null);
+    setSelectedNodeId(activeNodeId ?? null);
     setMessage('');
   }
 

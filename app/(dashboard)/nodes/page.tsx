@@ -112,47 +112,101 @@ export default function ClimbersPage() {
           </div>
         )}
 
-        <div className="grid gap-3">
-          {nodes.map((node) => {
-            const session = activeSessionByNode.get(node.id);
-            const isTracking = !!session;
-            const busy = actionId === node.id;
-            return (
-              <Card key={node.id}>
-                {/* Stack on mobile, side-by-side on sm+ */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <p className="font-semibold text-slate-800">{node.name}</p>
-                      <Badge
-                        label={isTracking ? '● Tracking Active' : '○ No Active Session'}
-                        variant={isTracking ? 'green' : 'gray'}
-                      />
-                    </div>
-                    <p className="text-xs text-slate-400 font-mono">Wristband: {node.mid}</p>
-                    {session && (
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Session #{session.id} · Started {formatTime(session.started_at)}
-                      </p>
-                    )}
-                  </div>
+        <div className="grid gap-6">
+          {/* ── New Devices Section ── */}
+          {nodes.some(n => !n.is_validated) && (
+            <section>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">
+                New Devices Detected (Unvalidated)
+              </h3>
+              <div className="grid gap-3">
+                {nodes.filter(n => !n.is_validated).map((node) => {
+                  const busy = actionId === node.id;
+                  return (
+                    <Card key={node.id} className="border-l-4 border-l-amber-400">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="font-mono font-bold text-slate-800">{node.mid}</p>
+                            <Badge label="New Device" variant="red" />
+                          </div>
+                          <p className="text-xs text-slate-500 italic">
+                            Waiting for admin to assign a climber name and validate.
+                          </p>
+                        </div>
 
-                  {isAdmin && (
-                    <div className="flex gap-2 shrink-0">
-                      {isTracking && (
-                        <Button size="sm" variant="secondary" loading={busy} onClick={() => handleEndClimb(node.id)}>
-                          End Climb
-                        </Button>
+                        {isAdmin && (
+                          <div className="flex gap-2 shrink-0">
+                            <Button size="sm" onClick={() => {
+                              setMid(node.mid);
+                              setClimberName('');
+                              setShowModal(true);
+                            }}>
+                              Validate &amp; Alias
+                            </Button>
+                            <Button size="sm" variant="danger" loading={busy} onClick={() => handleRemove(node.id, node.name, node.mid)}>
+                              Discard
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ── Registered Climbers Section ── */}
+          <section>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">
+              Registered Climbers
+            </h3>
+            <div className="grid gap-3">
+              {nodes.filter(n => n.is_validated).map((node) => {
+                const session = activeSessionByNode.get(node.id);
+                const isTracking = !!session;
+                const busy = actionId === node.id;
+                return (
+                  <Card key={node.id}>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          <p className="font-semibold text-slate-800">{node.name}</p>
+                          <Badge
+                            label={isTracking ? '● Tracking Active' : '○ No Active Session'}
+                            variant={isTracking ? 'green' : 'gray'}
+                          />
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono">Wristband: {node.mid}</p>
+                        {session && (
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            Session #{session.id} · Started {formatTime(session.started_at)}
+                          </p>
+                        )}
+                      </div>
+
+                      {isAdmin && (
+                        <div className="flex gap-2 shrink-0">
+                          {isTracking && (
+                            <Button size="sm" variant="secondary" loading={busy} onClick={() => handleEndClimb(node.id)}>
+                              End Climb
+                            </Button>
+                          )}
+                          <Button size="sm" variant="danger" loading={busy} onClick={() => handleRemove(node.id, node.name, node.mid)}>
+                            Remove
+                          </Button>
+                        </div>
                       )}
-                      <Button size="sm" variant="danger" loading={busy} onClick={() => handleRemove(node.id, node.name, node.mid)}>
-                        Remove
-                      </Button>
                     </div>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
+                  </Card>
+                );
+              })}
+              {nodes.filter(n => n.is_validated).length === 0 && (
+                <p className="text-sm text-slate-400 italic py-4 px-1">No climbers validated yet.</p>
+              )}
+            </div>
+          </section>
         </div>
       </div>
 

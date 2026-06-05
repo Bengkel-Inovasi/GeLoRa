@@ -22,18 +22,18 @@ import (
 )
 
 type Wiring struct {
-	log             portsoutboundlogging.Generic
-	repoUser        portsoutboundrepository.User
-	repoNode        portsoutboundrepository.Node
-	repoSession     portsoutboundrepository.Session
-	repoRecord      portsoutboundrepository.Record
-	repoAlert       portsoutboundrepository.Alert
-	svcHttpUser     portsinboundhttp.User
-	svcHttpNode     portsinboundhttp.Node
-	svcHttpSession  portsinboundhttp.Session
-	svcHttpRecord   portsinboundhttp.Record
-	svcHttpAlert    portsinboundhttp.Alert
-	svcMqttRecord   portsinboundmqtt.Record
+	Log             portsoutboundlogging.Generic
+	RepoUser        portsoutboundrepository.User
+	RepoNode        portsoutboundrepository.Node
+	RepoSession     portsoutboundrepository.Session
+	RepoRecord      portsoutboundrepository.Record
+	RepoAlert       portsoutboundrepository.Alert
+	SvcHttpUser     portsinboundhttp.User
+	SvcHttpNode     portsinboundhttp.Node
+	SvcHttpSession  portsinboundhttp.Session
+	SvcHttpRecord   portsinboundhttp.Record
+	SvcHttpAlert    portsinboundhttp.Alert
+	SvcMqttRecord   portsinboundmqtt.Record
 }
 
 func (c *Core) NewWiring(ctx context.Context) (err error) {
@@ -78,7 +78,7 @@ func (c *Core) NewWiring(ctx context.Context) (err error) {
 	// Services
 	svcHttpUser := domainservicehttpuser.NewImpl(c.infrastructure.sqlTX, log, repoUser)
 	svcHttpNode := domainservicehttpnode.NewImpl(c.infrastructure.sqlTX, log, repoNode, repoSession)
-	svcHttpSession := domainservicehttpsession.NewImpl(c.infrastructure.sqlTX, log, repoSession)
+	svcHttpSession := domainservicehttpsession.NewImpl(c.infrastructure.sqlTX, log, repoSession, repoNode)
 	svcHttpRecord := domainservicehttprecord.NewImpl(c.infrastructure.sqlTX, log, repoRecord)
 	svcHttpAlert := domainservicehttpalert.NewImpl(c.infrastructure.sqlTX, log, repoAlert)
 	svcMqttRecord := domainservicemqttrecord.NewImpl(c.infrastructure.sqlTX, log, repoRecord, repoNode, repoSession)
@@ -86,18 +86,18 @@ func (c *Core) NewWiring(ctx context.Context) (err error) {
 
 	// Inject
 	c.wiring = &Wiring{
-		log:            log,
-		repoUser:       repoUser,
-		repoNode:       repoNode,
-		repoSession:    repoSession,
-		repoRecord:     repoRecord,
-		repoAlert:      repoAlert,
-		svcHttpUser:    svcHttpUser,
-		svcHttpNode:    svcHttpNode,
-		svcHttpSession: svcHttpSession,
-		svcHttpRecord:  svcHttpRecord,
-		svcHttpAlert:   svcHttpAlert,
-		svcMqttRecord:  svcMqttRecord,
+		Log:            log,
+		RepoUser:       repoUser,
+		RepoNode:       repoNode,
+		RepoSession:    repoSession,
+		RepoRecord:     repoRecord,
+		RepoAlert:      repoAlert,
+		SvcHttpUser:    svcHttpUser,
+		SvcHttpNode:    svcHttpNode,
+		SvcHttpSession: svcHttpSession,
+		SvcHttpRecord:  svcHttpRecord,
+		SvcHttpAlert:   svcHttpAlert,
+		SvcMqttRecord:  svcMqttRecord,
 	}
 	log.Info(ctx, tag, "Wiring created successfully", nil)
 	return nil

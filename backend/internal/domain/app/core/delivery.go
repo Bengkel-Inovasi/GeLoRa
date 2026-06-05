@@ -15,25 +15,25 @@ func (c *Core) NewDelivery(ctx context.Context) (err error) {
 
 	adaptersinboundhttproutes.Route(
 		c.infrastructure.ginEngine.Group(""),
-		c.wiring.log,
-		c.wiring.svcHttpUser,
-		adaptersinboundhttphandler.NewUser(c.wiring.svcHttpUser),
-		adaptersinboundhttphandler.NewNode(c.wiring.svcHttpNode),
-		adaptersinboundhttphandler.NewSession(c.wiring.svcHttpSession),
-		adaptersinboundhttphandler.NewRecord(c.wiring.svcHttpRecord),
-		adaptersinboundhttphandler.NewAlert(c.wiring.svcHttpAlert),
+		c.wiring.Log,
+		c.wiring.SvcHttpUser,
+		adaptersinboundhttphandler.NewUser(c.wiring.SvcHttpUser),
+		adaptersinboundhttphandler.NewNode(c.wiring.SvcHttpNode),
+		adaptersinboundhttphandler.NewSession(c.wiring.SvcHttpSession),
+		adaptersinboundhttphandler.NewRecord(c.wiring.SvcHttpRecord),
+		adaptersinboundhttphandler.NewAlert(c.wiring.SvcHttpAlert),
 	)
-	c.wiring.log.Info(ctx, tag, "HTTP Routes delivered", nil)
+	c.wiring.Log.Info(ctx, tag, "HTTP Routes delivered", nil)
 
 	err = adaptersinboundmqttsubscriptions.Subscribe(
 		c.infrastructure.mqttClient,
-		adaptersinboundmqtthandler.NewRecord(c.wiring.log, c.wiring.svcMqttRecord),
+		adaptersinboundmqtthandler.NewRecord(c.wiring.Log, c.wiring.SvcMqttRecord),
 	)
 	if err != nil {
-		c.wiring.log.Error(ctx, tag, "Failed to subscribe MQTT Topics", domainmodel.LogMeta{"error": err.Error()})
+		c.wiring.Log.Error(ctx, tag, "Failed to subscribe MQTT Topics", domainmodel.LogMeta{"error": err.Error()})
 		return err
 	}
-	c.wiring.log.Info(ctx, tag, "MQTT Subscriptions delivered", nil)
+	c.wiring.Log.Info(ctx, tag, "MQTT Subscriptions delivered", nil)
 
 	return nil
 }

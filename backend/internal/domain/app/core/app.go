@@ -16,6 +16,10 @@ type Core struct {
 	wiring         *Wiring
 }
 
+func (c *Core) Wiring() *Wiring {
+	return c.wiring
+}
+
 func Run() int {
 	const tag = path + "/Run"
 	core := &Core{}
@@ -45,17 +49,17 @@ func Run() int {
 	// Delivery
 	err = core.NewDelivery(ctx)
 	if err != nil {
-		core.wiring.log.Error(ctx, tag, "Failed to deliver", nil)
+		core.wiring.Log.Error(ctx, tag, "Failed to deliver", nil)
 		return 1
 	}
 
 	// Start GIN Engine listening
 	addr := fmt.Sprintf("%s:%d", config.AppHost, config.AppPort)
-	core.wiring.log.Info(ctx, tag, "HTTP Server starting...", domainmodel.LogMeta{"addr": addr})
+	core.wiring.Log.Info(ctx, tag, "HTTP Server starting...", domainmodel.LogMeta{"addr": addr})
 
 	err = core.infrastructure.ginEngine.Run(addr)
 	if err != nil && err != http.ErrServerClosed {
-		core.wiring.log.Error(ctx, tag, "Failed to start HTTP server", domainmodel.LogMeta{"error": err.Error()})
+		core.wiring.Log.Error(ctx, tag, "Failed to start HTTP server", domainmodel.LogMeta{"error": err.Error()})
 		return 1
 	}
 

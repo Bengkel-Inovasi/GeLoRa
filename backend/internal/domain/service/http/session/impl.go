@@ -17,17 +17,20 @@ type impl struct {
 	tx          *sqldt.Transactor
 	log         portsoutboundlogging.Generic
 	repoSession portsoutboundrepository.Session
+	repoNode    portsoutboundrepository.Node
 }
 
 func NewImpl(
 	tx *sqldt.Transactor,
 	log portsoutboundlogging.Generic,
 	repoSession portsoutboundrepository.Session,
+	repoNode portsoutboundrepository.Node,
 ) portsinboundhttp.Session {
 	return &impl{
 		tx:          tx,
 		log:         log,
 		repoSession: repoSession,
+		repoNode:    repoNode,
 	}
 }
 
@@ -123,9 +126,32 @@ func (i *impl) SetSessionEndSession(ctx context.Context, id *int64, userId *int6
 		}
 	}
 
+	// 1. Resolve which node is associated with the session(s) being ended
+	var targetNodeIds []int64
+	if nodeId != nil {
+		targetNodeIds = append(targetNodeIds, *nodeId)
+	} else if id != nil {
+		if sess, err := i.repoSession.ReadSessionById(ctx, *id); err == nil && sess.NodeId != nil {
+			targetNodeIds = append(targetNodeIds, *sess.NodeId)
+		}
+	} else if userId != nil {
+		if sess, err := i.repoSession.ReadSessionLatest(ctx, userId, nil); err == nil && sess.NodeId != nil {
+			targetNodeIds = append(targetNodeIds, *sess.NodeId)
+		}
+	}
+
+	// 2. End the session(s)
 	if err = i.repoSession.UpdateSessionEndSession(ctx, id, userId, nodeId); err != nil {
 		i.log.Error(ctx, tag, "Failed to end session", logMeta(err))
 		return err
+	}
+
+	// 3. Reset node aliases (name) back to their MIDs
+	for _, nid := range targetNodeIds {
+		if node, err := i.repoNode.ReadNodeById(ctx, nid); err == nil {
+			// Reset name to mid, effectively "deleting" the alias
+			_ = i.repoNode.UpdateNodeInfoById(ctx, nid, &node.Mid, nil)
+		}
 	}
 
 	i.log.Info(ctx, tag, "Session ended", domainmodel.LogMeta{"id": id, "user_id": userId, "node_id": nodeId})
