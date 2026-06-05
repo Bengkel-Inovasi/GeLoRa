@@ -23,7 +23,11 @@ export function useNodeRecords(nodeIds: number[]) {
 
   const poll = useCallback(async () => {
     if (nodeIdsRef.current.length === 0) return;
-    const start = secondsAgo(RECORD_LOOKBACK_SECONDS);
+    
+    // Use a slightly larger lookback (1 hour) to ensure we have "last known" data 
+    // even if there hasn't been a pulse in the last 5 minutes.
+    const start = secondsAgo(3600); 
+    
     const results = await Promise.allSettled(
       nodeIdsRef.current.map((id) =>
         recordRepository.list({ node_id: id, start_time: start }),

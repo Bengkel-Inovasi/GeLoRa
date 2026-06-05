@@ -23,6 +23,9 @@ export function useNodes() {
 
   useEffect(() => {
     fetchNodes();
+    // Poll every 10 seconds to keep aliases and device list in sync across components
+    const id = setInterval(fetchNodes, 10000);
+    return () => clearInterval(id);
   }, [fetchNodes]);
 
   return { nodes, loading, error, refetch: fetchNodes };
