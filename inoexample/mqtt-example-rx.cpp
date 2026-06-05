@@ -1,10 +1,6 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
-
-// --- KONFIGURASI WIFI LOKAL ---
-// Pastikan ESP32 ini dan Komputer Ubuntu terhubung ke WiFi yang SAMA
-const char* ssid = "Galaxy S24 Ultra 530C";       
-const char* password = "12345678"; 
+#include <WiFiManager.h> // Required: Install "WiFiManager" by tzapu
 
 // --- KONFIGURASI MQTT SERVER (UBUNTU) ---
 const char* mqtt_server = "10.127.41.105"; // WSL2 IP (mirrored mode)
@@ -20,17 +16,19 @@ HardwareSerial loraSerial(2);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+WiFiManager wm;
 
 void setup_wifi() {
-  delay(10);
-  Serial.println();
-  Serial.print("Konek ke WiFi: "); Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500); Serial.print(".");
+  // Starts an Access Point "GeLoRa-Basecamp-Example" if it cannot connect to saved WiFi
+  bool res = wm.autoConnect("GeLoRa-Basecamp-Example");
+
+  if(!res) {
+    Serial.println("Gagal konek ke WiFi!");
+    ESP.restart();
+  } else {
+    Serial.println("\nWiFi Terhubung! IP: ");
+    Serial.println(WiFi.localIP());
   }
-  Serial.println("\nWiFi Terhubung! IP: ");
-  Serial.println(WiFi.localIP());
 }
 
 void reconnect() {
