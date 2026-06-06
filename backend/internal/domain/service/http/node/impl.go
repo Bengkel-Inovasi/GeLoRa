@@ -116,19 +116,35 @@ func (i *impl) SetNodeValidate(ctx context.Context, id int64, validatedBy int64)
 func (i *impl) RegisterClimber(ctx context.Context, mid string, name string, validatedBy int64) (nodeId int64, sessionId int64, err error) {
 	const tag = path + "/RegisterClimber"
 
-	// Node must already exist — auto-created when the wristband first transmitted via MQTT.
-	// If not found, the MID was never seen, meaning the device hasn't transmitted yet.
+	// 1. Resolve or create the node from MID.
 	node, err := i.repoNode.ReadNodeByMid(ctx, mid)
 	if err != nil {
-		if errors.Is(err, domainmodel.ErrNodeNotFound) {
-			i.log.Info(ctx, tag, "Registration rejected: MID never transmitted", domainmodel.LogMeta{"mid": mid})
-			return 0, 0, domainmodel.ErrNodeNotFound
+		if !errors.Is(err, domainmodel.ErrNodeNotFound) {
+			i.log.Error(ctx, tag, "Failed to read node by MID", domainmodel.LogMeta{"error": err.Error(), "mid": mid})
+			return 0, 0, err
 		}
-		i.log.Error(ctx, tag, "Failed to read node by MID", domainmodel.LogMeta{"error": err.Error(), "mid": mid})
-		return 0, 0, err
+
+		// If not found, create it on the fly.
+		nodeId, err = i.repoNode.CreateNode(ctx, mid, name)
+		if err != nil {
+			if errors.Is(err, domainmodel.ErrNodeMidExists) {
+				// Race condition: node created between read and create. Retry read.
+				node, err = i.repoNode.ReadNodeByMid(ctx, mid)
+				if err != nil {
+					i.log.Error(ctx, tag, "Failed to read node by MID after conflict", domainmodel.LogMeta{"error": err.Error(), "mid": mid})
+					return 0, 0, err
+				}
+				nodeId = node.Id
+			} else {
+				i.log.Error(ctx, tag, "Failed to auto-create node during registration", domainmodel.LogMeta{"error": err.Error(), "mid": mid})
+				return 0, 0, err
+			}
+		}
+	} else {
+		nodeId = node.Id
 	}
 
-	nodeId = node.Id
+	// 2. Update node info (name) and validation.
 	if err = i.repoNode.UpdateNodeInfoById(ctx, nodeId, &name, nil); err != nil {
 		i.log.Error(ctx, tag, "Failed to update node name", domainmodel.LogMeta{"error": err.Error(), "id": nodeId})
 		return 0, 0, err
@@ -139,9 +155,10 @@ func (i *impl) RegisterClimber(ctx context.Context, mid string, name string, val
 		return 0, 0, err
 	}
 
-	// End any active session for this node before starting a new one
+	// 3. End any active session for this node before starting a new one.
 	_ = i.repoSession.UpdateSessionEndSession(ctx, nil, nil, &nodeId)
 
+	// 4. Start a new tracking session.
 	sessionId, err = i.repoSession.CreateSession(ctx, validatedBy, nodeId)
 	if err != nil {
 		i.log.Error(ctx, tag, "Failed to create session", domainmodel.LogMeta{"error": err.Error(), "node_id": nodeId})
