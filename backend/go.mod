@@ -1,6 +1,6 @@
 module github.com/Bengkel-Inovasi/GeLoRa/backend
 
-go 1.24.0
+go 1.25.0
 
 require github.com/Masterminds/squirrel v1.5.4
 
