@@ -345,10 +345,14 @@ func Route(
 		adaptersinboundhttpmiddlewarerolerule.RoleRule([]adaptersinboundhttpmiddlewarerolerule.RoleRuler{
 			{
 				Role: domainmodel.UserRoleSuper,
-				Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll(),
+				Rule: adaptersinboundhttpmiddlewarerolerule.RoleAllowAll(),
 			},
 			{
 				Role: domainmodel.UserRoleAdmin,
+				Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll(),
+			},
+			{
+				Role: domainmodel.UserRoleClient,
 				Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll(),
 			},
 		}),
