@@ -13,9 +13,9 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Build the applications
-RUN go build -o migrate cmd/migrate/main.go
-RUN go build -o core cmd/core/main.go
+# Build the applications as static binaries
+RUN CGO_ENABLED=0 go build -o migrate cmd/migrate/main.go
+RUN CGO_ENABLED=0 go build -o core cmd/core/main.go
 
 # Final stage
 FROM alpine:latest
@@ -36,24 +36,13 @@ COPY --from=builder /app/docs ./docs
 # Create a directory for the database
 RUN mkdir -p /data
 
-# Create entrypoint script with error checking
-RUN echo '#!/bin/sh\n\
-echo "Starting migrations..."\n\
-./migrate up\n\
-if [ $? -ne 0 ]; then\n\
-  echo "Migration failed!"\n\
-  exit 1\n\
-fi\n\
-echo "Starting application..."\n\
-./core' > entrypoint.sh
+# Use a direct command string to avoid shell script issues
+# This will run migrate up, and if successful, run core
+CMD ["sh", "-c", "./migrate up && ./core"]
 
-RUN chmod +x entrypoint.sh
-
-# Expose port (Railway will use PORT env var)
+# Expose port
 EXPOSE 80
 
 # Default env vars
 ENV APP_PORT=80
 ENV SQLITE_DATABASE=/data/gelora.db
-
-CMD ["./entrypoint.sh"]
