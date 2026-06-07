@@ -15,6 +15,7 @@ COPY . .
 
 # Build the applications as static binaries
 RUN CGO_ENABLED=0 go build -o migrate cmd/migrate/main.go
+RUN CGO_ENABLED=0 go build -o seeder cmd/seeder/main.go
 RUN CGO_ENABLED=0 go build -o core cmd/core/main.go
 
 # Final stage
@@ -27,6 +28,7 @@ RUN apk add --no-cache ca-certificates tzdata
 
 # Copy binaries from builder
 COPY --from=builder /app/migrate .
+COPY --from=builder /app/seeder .
 COPY --from=builder /app/core .
 
 # Copy migrations and documentation
@@ -37,9 +39,9 @@ COPY --from=builder /app/docs ./docs
 RUN mkdir -p /data
 
 # Use a direct command string to avoid shell script issues
-# This will run migrate up, and if successful, run core
+# This will run migrate up, seeder, and then run core
 # We map Railway's $PORT to APP_PORT
-CMD ["sh", "-c", "./migrate up && APP_PORT=${PORT:-80} ./core"]
+CMD ["sh", "-c", "./migrate up && ./seeder && APP_PORT=${PORT:-80} ./core"]
 
 # Expose port
 EXPOSE 80
