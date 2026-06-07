@@ -40,7 +40,6 @@ RUN mkdir -p /data
 
 # Use a direct command string to avoid shell script issues
 # This will run migrate up, seeder, and then run core
-# We map Railway's $PORT to APP_PORT
 CMD ["sh", "-c", "./migrate up && ./seeder && APP_PORT=${PORT:-80} ./core"]
 
 # Expose port

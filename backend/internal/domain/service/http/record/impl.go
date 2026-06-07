@@ -50,5 +50,11 @@ func (i *impl) GetRecords(ctx context.Context, sessionId *int64, userId *int64, 
 		return nil, err
 	}
 
+	i.log.Info(ctx, tag, "Records retrieved", domainmodel.LogMeta{
+		"count":      len(records),
+		"node_id":    nodeId,
+		"start_time": startTime,
+	})
+
 	return records, nil
 }

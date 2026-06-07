@@ -275,6 +275,10 @@ func Route(
 				Role: domainmodel.UserRoleAdmin,
 				Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll(),
 			},
+			{
+				Role: domainmodel.UserRoleClient,
+				Rule: adaptersinboundhttpmiddlewarerolerule.RuleAllowAll(),
+			},
 		}),
 	)
 	{
