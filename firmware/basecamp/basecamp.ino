@@ -1,14 +1,15 @@
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
 #include "LittleFS.h"
 
 // --- Variabel Global (Akan diisi dari Web Portal atau LittleFS) ---
-char mqtt_server[40] = "10.127.41.105";
-char mqtt_port[6]    = "1883";
-char mqtt_user[40]   = "gelora-mqtt";
-char mqtt_pass[40]   = "gelora-mqtt";
+char mqtt_server[60] = "your-cluster-id.s1.eu.hivemq.cloud";
+char mqtt_port[6]    = "8883";
+char mqtt_user[40]   = "your_username";
+char mqtt_pass[40]   = "your_password";
 char mqtt_topic[50]  = "/server/record";
 
 // --- Flag untuk simpan config ---
@@ -19,7 +20,7 @@ bool shouldSaveConfig = false;
 #define LORA_TX_PIN 27 
 HardwareSerial loraSerial(2);
 
-WiFiClient espClient;
+WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 // Callback saat user menekan "Save" di portal web WiFiManager
@@ -84,7 +85,7 @@ void setup_wifi() {
   wm.setSaveConfigCallback(saveConfigCallback);
 
   // Buat input field kustom untuk MQTT di halaman WiFiManager
-  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server IP", mqtt_server, 40);
+  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server URL", mqtt_server, 60);
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Port", mqtt_port, 6);
   WiFiManagerParameter custom_mqtt_user("user", "MQTT Username", mqtt_user, 40);
   WiFiManagerParameter custom_mqtt_pass("pass", "MQTT Password", mqtt_pass, 40);
@@ -134,6 +135,9 @@ void reconnect() {
 
 void setup() {
   Serial.begin(115200);
+  
+  // Izinkan koneksi TLS tanpa verifikasi sertifikat (untuk kemudahan prototype)
+  espClient.setInsecure();
   
   // Inisialisasi LoRa UART AS32
   loraSerial.begin(9600, SERIAL_8N1, LORA_RX_PIN, LORA_TX_PIN);
